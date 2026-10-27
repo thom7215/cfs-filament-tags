@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CFS Filament Stickers</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div>
+        <p class="kicker">Creality CFS</p>
+        <h1>Filament sticker studio</h1>
+      </div>
+      <p class="lede">Build the record a CFS reads from a filament sticker. The sticker carries a material code, a color, and a spool length. Brand and temperatures stay in the printer’s filament list for that code.</p>
+    </header>
+
+    <div class="layout">
+      <form id="form" class="panel">
+        <div class="tabs" role="tablist">
+          <button type="button" id="tab-mine" role="tab" aria-selected="true" aria-controls="mine-fields">My filament</button>
+          <button type="button" id="tab-catalog" role="tab" aria-selected="false" aria-controls="catalog-fields">Creality list</button>
+        </div>
+
+        <div id="catalog-fields" class="section" hidden>
+          <label>
+            <span>Known filament</span>
+            <select id="catalog"></select>
+          </label>
+          <p class="hint">Picking a row fills the code the CFS already understands. Color and spool size are still yours.</p>
+        </div>
+
+        <fieldset class="section">
+          <legend>Filament</legend>
+          <div class="grid two">
+            <label>
+              <span>Brand</span>
+              <input id="brand" name="brand" value="Polymaker" maxlength="40" required>
+            </label>
+            <label>
+              <span>Name</span>
+              <input id="product" name="product" value="PolyLite PETG" maxlength="48" required>
+            </label>
+            <label>
+              <span>Type</span>
+              <select id="type" name="type"></select>
+            </label>
+            <label>
+              <span>Material code</span>
+              <span class="inline">
+                <input id="code" name="code" value="90001" maxlength="5" autocapitalize="characters" spellcheck="false" required>
+                <button type="button" class="ghost" id="suggest-code">Unused</button>
+              </span>
+            </label>
+          </div>
+          <p class="hint">The code is the only identity written on the sticker. Five letters or digits, matching a filament the printer already knows, or one you add.</p>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend>Color and spool</legend>
+          <div class="color-row">
+            <label>
+              <span>Color</span>
+              <input id="color" name="color" type="color" value="#2f6fed">
+            </label>
+            <label>
+              <span>Hex</span>
+              <input id="hex" name="hex" value="2F6FED" maxlength="7" spellcheck="false">
+            </label>
+          </div>
+          <div class="swatches" id="swatches">
+            <button type="button" data-color="#F4F4F2" aria-label="White"></button>
+            <button type="button" data-color="#1A1A1A" aria-label="Black"></button>
+            <button type="button" data-color="#D7263D" aria-label="Red"></button>
+            <button type="button" data-color="#2F6FED" aria-label="Blue"></button>
+            <button type="button" data-color="#2E8B57" aria-label="Green"></button>
+            <button type="button" data-color="#8A8F98" aria-label="Gray"></button>
+            <button type="button" data-color="#E4572E" aria-label="Orange"></button>
+            <button type="button" data-color="#F2C14E" aria-label="Yellow"></button>
+            <button type="button" data-color="#6C4AB6" aria-label="Purple"></button>
+            <button type="button" data-color="#C6A15B" aria-label="Bronze"></button>
+          </div>
+          <div class="grid two" style="margin-top: 12px">
+            <label>
+              <span>Spool</span>
+              <select id="weight" name="weight">
+                <option value="250">250 g · 80 m</option>
+                <option value="500">500 g · 165 m</option>
+                <option value="1000" selected>1 kg · 330 m</option>
+                <option value="custom">Custom length</option>
+              </select>
+            </label>
+            <label id="meters-label" hidden>
+              <span>Length in meters</span>
+              <input id="meters" name="meters" type="number" min="1" max="9999" value="330">
+            </label>
+          </div>
+          <p class="hint" id="length-note"></p>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend>Temperatures</legend>
+          <div class="grid four">
+            <label>
+              <span>Low °C</span>
+              <input id="temp-min" name="temp-min" type="number" min="0" max="450" value="220" required>
+            </label>
+            <label>
+              <span>High °C</span>
+              <input id="temp-max" name="temp-max" type="number" min="0" max="450" value="270" required>
+            </label>
+            <label>
+              <span>Printing °C</span>
+              <input id="temp-print" name="temp-print" type="number" min="0" max="450" value="240" required>
+            </label>
+            <label>
+              <span>Bed °C</span>
+              <input id="temp-bed" name="temp-bed" type="number" min="0" max="180" value="80" required>
+            </label>
+          </div>
+          <p class="source" id="temp-source"></p>
+        </fieldset>
+
+        <details>
+          <summary>Batch, vendor, date, serial</summary>
+          <div class="grid two">
+            <label>
+              <span>Manufacture date</span>
+              <input id="date" name="date" type="date" required>
+            </label>
+            <label>
+              <span>Serial</span>
+              <span class="inline">
+                <input id="serial" name="serial" value="000001" maxlength="6" spellcheck="false">
+                <button type="button" class="ghost" id="new-serial">New</button>
+              </span>
+            </label>
+            <label>
+              <span>Batch</span>
+              <input id="batch" name="batch" value="001" maxlength="3" spellcheck="false">
+            </label>
+            <label>
+              <span>Vendor code</span>
+              <input id="supplier" name="supplier" value="0000" maxlength="4" spellcheck="false">
+            </label>
+          </div>
+          <p class="hint">The CFS does not show these. Creality’s own spools often use vendor code 0276. Leave the reserved tail as zeros.</p>
+        </details>
+      </form>
+
+      <aside class="preview panel" aria-live="polite">
+        <div class="spool" aria-hidden="true">
+          <div class="flange"></div>
+          <div class="filament" id="filament"></div>
+          <div class="flange"></div>
+        </div>
+        <p class="slot-brand" id="slot-brand">Polymaker</p>
+        <h2 class="slot-name" id="slot-name">PolyLite PETG</h2>
+        <div class="facts" id="facts"></div>
+        <div id="status"></div>
+        <h3 class="block-title">On the sticker</h3>
+        <div class="record" id="record"></div>
+        <div class="payload" id="payload">—</div>
+        <div class="actions">
+          <button type="button" class="solid" id="copy-record">Copy record</button>
+          <button type="button" class="ghost" id="copy-blocks">Copy blocks</button>
+          <button type="button" class="ghost" id="download">Download</button>
+        </div>
+        <h3 class="block-title">Blocks 4, 5, and 6</h3>
+        <div class="blocks" id="blocks">—</div>
+        <h3 class="block-title" style="margin-top: 14px">Printer setup</h3>
+        <p class="hint" id="setup-lead"></p>
+        <div class="snippet" id="notes"></div>
+        <div class="actions">
+          <button type="button" class="ghost" id="copy-notes">Copy notes</button>
+        </div>
+        <details>
+          <summary>Custom K2 firmware command</summary>
+          <p class="hint">Only for firmware that understands this macro. Stock CFS does not.</p>
+          <div class="snippet" id="map-command"></div>
+          <div class="actions">
+            <button type="button" class="ghost" id="copy-map">Copy command</button>
+          </div>
+        </details>
+      </aside>
+    </div>
+
+    <section class="panel lower">
+      <div class="write-grid">
+        <div>
+          <h2>Writing the sticker</h2>
+          <p class="muted">A phone browser cannot program these chips. CFS stickers are MIFARE Classic 1K, and browser NFC only writes NDEF tags such as NTAG213. The bytes above are the whole job once you have a writer that speaks MIFARE Classic.</p>
+          <ol>
+            <li>Use a 13.56 MHz MIFARE Classic 1K sticker, sold as F08, S50, or “1K NFC.” NTAG stickers will not work.</li>
+            <li>Authenticate sector 1 with Key A <code>FFFFFFFFFFFF</code>. That is the factory key on a blank sticker. Leave the sector trailer alone.</li>
+            <li>Write block 4, block 5, and block 6 with the hex above. Write the same record on both sides of the spool.</li>
+            <li>Many Samsung phones can do this from an Android MIFARE Classic app. Pixel phones generally cannot. A USB reader such as an ACR122U can.</li>
+          </ol>
+        </div>
+        <div>
+          <h2>Check a record</h2>
+          <p class="muted">Paste a 48-character sticker record, or the 96 hex characters from the three blocks.</p>
+          <textarea id="decode-input" spellcheck="false" placeholder="56D241200A2100001#0000FF016500000100000000000000"></textarea>
+          <div class="decode-result" id="decode-result"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="js/catalog.js"></script>
+  <script src="js/encode.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

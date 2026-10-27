@@ -1,0 +1,92 @@
+(function (root) {
+  "use strict";
+
+  // code, brand, name, type, nozzle min, nozzle max, print temp, bed, origin
+  // origin "database": Creality material_database.json (K1 SE publish), nozzle window and print temp from that profile.
+  // origin "reader": codes in the Creality RFID lookup table. Print temp is the catalog default.
+  // origin "community": community CFS catalogs. Print temp is that catalog's default; the window is typical for the material.
+  var rows = [
+    ["01001", "Creality", "Hyper PLA", "PLA", 190, 240, 220, 60, "database"],
+    ["02001", "Creality", "Hyper PLA-CF", "PLA-CF", 190, 240, 220, 60, "database"],
+    ["03001", "Creality", "Hyper ABS", "ABS", 230, 260, 260, 80, "database"],
+    ["04001", "Creality", "CR-PLA", "PLA", 190, 240, 230, 60, "database"],
+    ["05001", "Creality", "CR-Silk", "PLA", 190, 240, 220, 60, "database"],
+    ["06001", "Creality", "CR-PETG", "PETG", 220, 270, 250, 80, "database"],
+    ["06002", "Creality", "Hyper PETG", "PETG", 220, 270, 250, 70, "database"],
+    ["07001", "Creality", "CR-ABS", "ABS", 230, 260, 260, 90, "database"],
+    ["00001", "Generic", "Generic PLA", "PLA", 190, 240, 220, 60, "database"],
+    ["00002", "Generic", "Generic PLA-Silk", "PLA", 190, 240, 220, 60, "database"],
+    ["00003", "Generic", "Generic PETG", "PETG", 220, 270, 240, 80, "database"],
+    ["00004", "Generic", "Generic ABS", "ABS", 240, 280, 260, 90, "database"],
+    ["00005", "Generic", "Generic TPU", "TPU", 200, 250, 220, 35, "database"],
+    ["00006", "Generic", "Generic PLA-CF", "PLA-CF", 190, 240, 220, 60, "database"],
+    ["00007", "Generic", "Generic ASA", "ASA", 240, 280, 260, 90, "database"],
+    ["10001", "Creality", "HP-TPU", "TPU", 200, 220, 215, 35, "database"],
+
+    ["01601", "Creality", "Soleyin Ultra PLA", "PLA", 190, 240, 215, 50, "reader"],
+    ["07002", "Creality", "Hyper PC", "PC", 250, 270, 260, 110, "reader"],
+    ["08001", "Creality", "Ender-PLA", "PLA", 190, 240, 215, 50, "reader"],
+    ["09001", "Creality", "EN-PLA+", "PLA", 190, 240, 215, 50, "reader"],
+    ["09002", "Creality", "ENDER FAST PLA", "PLA", 190, 240, 215, 50, "reader"],
+    ["11001", "Creality", "CR-Nylon", "PA", 250, 270, 260, 50, "reader"],
+    ["12002", "Creality", "Hyper PPA-CF", "PA-CF", 280, 320, 300, 100, "reader"],
+    ["12003", "Creality", "Hyper PAHT-CF", "PA-CF", 280, 320, 300, 90, "reader"],
+    ["13001", "Creality", "CR-PLA Carbon", "PLA", 190, 240, 215, 50, "reader"],
+    ["14001", "Creality", "CR-PLA Matte", "PLA", 190, 240, 215, 50, "reader"],
+    ["15001", "Creality", "CR-PLA Fluo", "PLA", 190, 240, 215, 50, "reader"],
+    ["16001", "Creality", "CR-TPU", "TPU", 210, 240, 225, 40, "reader"],
+    ["17001", "Creality", "CR-Wood", "PLA", 190, 240, 215, 50, "reader"],
+    ["18001", "Creality", "HP Ultra PLA", "PLA", 190, 240, 215, 50, "reader"],
+    ["19001", "Creality", "HP-ASA", "ASA", 240, 280, 260, 90, "reader"],
+
+    ["01002", "Creality", "Hyper L-W PLA", "PLA", 190, 250, 235, 50, "community"],
+    ["01004", "Creality", "Hyper Stardust", "PLA", 190, 240, 215, 60, "community"],
+    ["06003", "Creality", "Hyper PETG-CF", "PETG-CF", 230, 270, 250, 70, "community"],
+    ["12004", "Creality", "Hyper PA612-CF", "PA612-CF", 280, 320, 305, 90, "community"],
+    ["12005", "Creality", "Hyper PA6-CF", "PA6-CF", 280, 320, 305, 90, "community"],
+    ["29001", "Creality", "Hyper Marble", "PLA", 190, 240, 215, 60, "community"],
+    ["E1001", "eSUN", "PLA+", "PLA+", 200, 230, 220, 60, "community"],
+    ["00035", "eSUN", "PLA-LW", "PLA", 210, 250, 230, 50, "community"],
+    ["P1001", "Polymaker", "Panchroma PLA Satin", "PLA", 190, 230, 210, 60, "community"],
+    ["P1002", "Polymaker", "PolySonic PLA Pro", "PLA", 190, 230, 210, 60, "community"],
+    ["P1003", "Polymaker", "Panchroma PLA Matte", "PLA", 190, 230, 210, 60, "community"],
+    ["00008", "Generic", "Generic PA", "PA", 250, 280, 250, 70, "community"],
+    ["00009", "Generic", "Generic PA-CF", "PA-CF", 270, 300, 280, 90, "community"],
+    ["00010", "Generic", "Generic BVOH", "BVOH", 190, 220, 210, 45, "community"],
+    ["00011", "Generic", "Generic PVA", "PVA", 200, 230, 220, 50, "community"],
+    ["00012", "Generic", "Generic HIPS", "HIPS", 220, 250, 235, 90, "community"],
+    ["00013", "Generic", "Generic PET-CF", "PET-CF", 280, 320, 300, 80, "community"],
+    ["00014", "Generic", "Generic PETG-CF", "PETG-CF", 230, 270, 250, 70, "community"],
+    ["00015", "Generic", "Generic PA6-CF", "PA6-CF", 270, 310, 290, 90, "community"],
+    ["00016", "Generic", "Generic PAHT-CF", "PAHT-CF", 290, 320, 310, 90, "community"],
+    ["00017", "Generic", "Generic PPS", "PPS", 320, 350, 335, 100, "community"],
+    ["00018", "Generic", "Generic PPS-CF", "PPS-CF", 310, 340, 325, 100, "community"],
+    ["00019", "Generic", "Generic PP", "PP", 220, 250, 235, 80, "community"],
+    ["00020", "Generic", "Generic PET", "PET", 240, 280, 260, 70, "community"],
+    ["00021", "Generic", "Generic PC", "PC", 250, 300, 260, 100, "community"],
+    ["00022", "Generic", "Generic PA612-CF", "PA612-CF", 270, 310, 290, 90, "community"],
+    ["00023", "Generic", "Generic Support for PA", "PA", 260, 300, 280, 80, "community"],
+    ["00024", "Generic", "Generic Support for PLA", "PLA", 190, 230, 215, 60, "community"],
+    ["00025", "Generic", "Generic PA12-CF", "PA12-CF", 270, 310, 290, 90, "community"],
+    ["00026", "Generic", "Generic TPU 64D", "TPU", 210, 240, 225, 40, "community"],
+    ["00027", "Generic", "Generic PETG-GF", "PETG-GF", 240, 280, 260, 70, "community"],
+    ["00031", "Generic", "Generic PP-CF", "PP-CF", 230, 260, 245, 80, "community"],
+    ["00032", "Generic", "Generic PCTG", "PCTG", 240, 280, 260, 70, "community"],
+    ["00033", "Generic", "Generic ASA-CF", "ASA-CF", 250, 280, 265, 90, "community"],
+    ["00034", "Generic", "Generic PA6-GF", "PA6-GF", 250, 290, 270, 80, "community"],
+  ];
+
+  root.CFS_MATERIALS = rows.map(function (row) {
+    return {
+      code: row[0],
+      brand: row[1],
+      name: row[2],
+      type: row[3],
+      min: row[4],
+      max: row[5],
+      print: row[6],
+      bed: row[7],
+      origin: row[8],
+    };
+  });
+})(typeof globalThis !== "undefined" ? globalThis : this);
